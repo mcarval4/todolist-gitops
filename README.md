@@ -22,3 +22,8 @@ helm template todolist apps/todolist/chart --values environments/local/todolist-
 
 The local runner requires a ready `todolist-demo` kind cluster. It is provisioned by
 `mcarval4/todolist-platform`.
+
+After all deployment checks pass, `Deploy And Verify Local Platform` uses a short-lived GitHub
+App token to notify `todolist-app`. That repository creates the tag and GitHub Release at the
+validated source revision. Configure `TODOLIST_AUTOMATION_APP_ID` and
+`TODOLIST_AUTOMATION_APP_PRIVATE_KEY` as Actions secrets in this repository.

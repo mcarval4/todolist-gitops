@@ -40,3 +40,26 @@ jobs:
           path: evidence/generated/
           if-no-files-found: warn
           retention-days: 30
+      - name: Create application installation token
+        if: success()
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.TODOLIST_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.TODOLIST_AUTOMATION_APP_PRIVATE_KEY }}
+          owner: mcarval4
+          repositories: todolist-app
+      - name: Notify the validated application release
+        if: success()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          values=environments/local/todolist-values.yaml
+          version=$(awk '$1 == "version:" { gsub(/"/, "", $2); print $2; exit }' "$values")
+          source_revision=$(awk '$1 == "sourceRevision:" { gsub(/"/, "", $2); print $2; exit }' "$values")
+          test -n "$version"
+          test -n "$source_revision"
+          gh api --method POST repos/mcarval4/todolist-app/dispatches \
+            -f event_type=gitops-validation-succeeded \
+            -f "client_payload[version]=$version" \
+            -f "client_payload[source_revision]=$source_revision"
