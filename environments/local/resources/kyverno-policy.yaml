@@ -1,0 +1,53 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: todolist-workload-baseline
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: require-restricted-security-context
+      match:
+        any:
+          - resources:
+              kinds: [Deployment]
+              namespaces: [todolist]
+      validate:
+        message: Workloads must use the restricted security baseline.
+        pattern:
+          spec:
+            template:
+              spec:
+                securityContext:
+                  runAsNonRoot: true
+                containers:
+                  - securityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop: ["ALL"]
+                    resources:
+                      requests:
+                        cpu: "?*"
+                        memory: "?*"
+                      limits:
+                        cpu: "?*"
+                        memory: "?*"
+    - name: require-signed-todolist-image
+      match:
+        any:
+          - resources:
+              kinds: [Deployment]
+              names: [todolist-todolist]
+              namespaces: [todolist]
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/*"
+          mutateDigest: false
+          required: true
+          attestors:
+            - entries:
+                - keyless:
+                    subjectRegExp: "https://github.com/mcarval4/todolist-app/.github/workflows/release.yml@.*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"

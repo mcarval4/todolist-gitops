@@ -1,0 +1,22 @@
+name: Verify GitOps
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: "3.16.4"
+      - name: Lint Helm chart
+        run: helm lint apps/todolist/chart
+      - name: Render local environment
+        run: helm template todolist apps/todolist/chart --values environments/local/todolist-values.yaml > rendered.yaml
+      - name: Validate rendered Kubernetes resources
+        run: docker run --rm --volume "$PWD:/work" ghcr.io/yannh/kubeconform:v0.6.7 -strict -summary -skip CiliumNetworkPolicy /work/rendered.yaml

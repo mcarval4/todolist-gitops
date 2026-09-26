@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: todolist
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/mcarval4/todolist-gitops.git
+      targetRevision: main
+      path: apps/todolist/chart
+      helm:
+        valueFiles:
+          - $values/environments/local/todolist-values.yaml
+    - repoURL: https://github.com/mcarval4/todolist-gitops.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/mcarval4/todolist-gitops.git
+      targetRevision: main
+      path: environments/local/resources
+      directory:
+        recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: todolist
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

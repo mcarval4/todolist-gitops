@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "todolist.fullname" . }}-cleanup
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: {{ include "todolist.name" . }}
+            app.kubernetes.io/component: cleanup
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: cleanup
+              image: curlimages/curl:8.11.1
+              args:
+                - --fail
+                - --silent
+                - --show-error
+                - -X
+                - POST
+                - -H
+                - "X-Cleanup-Token: $(CLEANUP_TOKEN)"
+                - http://{{ include "todolist.fullname" . }}/cleanup
+              env:
+                - name: CLEANUP_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: todolist-secrets
+                      key: CLEANUP_TOKEN
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 50m
+                  memory: 64Mi

@@ -1,0 +1,7 @@
+image:
+  repository: ghcr.io/mcarval4/todolist-app
+  digest: "sha256:46b3c4f82fc5c0a48e3dfdc06ffbb8c66140e67dd721198cdcca027f9224aab3"
+
+release:
+  version: "1.0.0"
+  sourceRevision: "0fb3fd7"

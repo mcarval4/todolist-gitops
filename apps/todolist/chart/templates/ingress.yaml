@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "todolist.fullname" . }}
+spec:
+  ingressClassName: cilium
+  rules:
+    - host: todolist.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "todolist.fullname" . }}
+                port:
+                  name: http

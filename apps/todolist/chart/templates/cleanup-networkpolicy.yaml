@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "todolist.fullname" . }}-cleanup
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "todolist.name" . }}
+      app.kubernetes.io/component: cleanup
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "todolist.name" . }}
+      ports:
+        - protocol: TCP
+          port: 5000
