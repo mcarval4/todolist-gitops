@@ -1,7 +1,7 @@
 # TodoList GitOps
 
-This repository is the source of truth for the TodoList deployment. Argo CD reconciles the local
-environment from `bootstrap/todolist-local.yaml`.
+This repository is the source of truth for the TodoList deployment. Argo CD is bootstrapped by
+`mcarval4/todolist-platform` and reconciles the local environment from this repository.
 
 Application releases update only `environments/local/todolist-values.yaml` through a pull request.
 The image digest, rather than a mutable tag, identifies the deployed application version.
@@ -10,7 +10,6 @@ The image digest, rather than a mutable tag, identifies the deployed application
 
 - `apps/todolist/chart`: Helm chart for the TodoList workload.
 - `environments/local`: image promotion values and local environment resources.
-- `bootstrap`: Argo CD Application definitions.
 - `tests` and `scripts`: post-sync checks executed by the local deployment runner.
 
 ## Local Validation
