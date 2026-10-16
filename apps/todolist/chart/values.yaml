@@ -20,3 +20,5 @@ autoscaling:
   minReplicas: 3
   maxReplicas: 4
   targetCPUUtilizationPercentage: 70
+
+appColor: purple
