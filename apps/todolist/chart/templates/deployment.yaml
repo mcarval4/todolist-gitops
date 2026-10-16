@@ -55,6 +55,8 @@ spec:
               value: todolist
             - name: SECRETS_DIR
               value: /var/run/secrets/todolist
+            - name: APP_COLOR
+              value: {{ .Values.appColor | quote }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           securityContext:
